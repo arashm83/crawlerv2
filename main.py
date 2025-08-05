@@ -58,14 +58,13 @@ async def main():
         if not await is_logged_in(context):
             await log_in(context)
 
-        await get_answers(context, 'https://www.quora.com/Should-I-do-BS-in-data-science-or-BS-in-Mathematics-and-economics')
-        # for i in range(REPEAT):
+        for i in range(REPEAT):
 
-            # tasks = [process_url(context, url, sem, db) for url in topics_urls]
-            # await asyncio.gather(*tasks)
+            tasks = [process_url(context, url, sem, db) for url in topics_urls]
+            await asyncio.gather(*tasks)
 
-        # await browser.close()
-        # await db.close()
+        await browser.close()
+        await db.close()
 
 if __name__ == '__main__':
     asyncio.run(main())
