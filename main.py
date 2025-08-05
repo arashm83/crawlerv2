@@ -28,7 +28,11 @@ async def process_url(context: BrowserContext, url: str, sem: asyncio.Semaphore)
         try:
             questions = await get_questions(context, url, page)
 
+
             for q_text, q_url in questions:
+                q_hash = hashlib.sha256(q_url.encode()).hexdigest()
+                if q_hash in db.question_hashes:
+                    continue
                 answers = await get_answers(context, q_url, page)
                 if not answers:
                     continue
@@ -40,7 +44,7 @@ async def process_url(context: BrowserContext, url: str, sem: asyncio.Semaphore)
                         "author_url": a_url
                     })
                 await db.add_question_with_answers(
-                    {"text": q_text, "question_url": q_url},
+                    {"text": q_text, "question_url": q_url, "hash": q_hash},
                     answer_data
                 )
             print(f'done with url: {url}')

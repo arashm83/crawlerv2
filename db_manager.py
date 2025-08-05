@@ -57,7 +57,6 @@ class DbManager:
 
         try:
             question = Question(**question_data)
-            question.hash = hashlib.sha256(question.question_url.encode()).hexdigest()
             if question.hash in self.question_hashes:
                 return
             self.session.add(question)
