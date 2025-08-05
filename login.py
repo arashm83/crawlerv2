@@ -1,7 +1,7 @@
 from playwright.async_api import  TimeoutError, BrowserContext
 
-EMAIL = 'arashmanouchehri83@gmail.com'
-PASSWORD = 'Arash1383'
+EMAIL = 'example@gmail.com'
+PASSWORD = 'password'
 
 async def log_in(context: BrowserContext ,email=EMAIL, password=PASSWORD):
         
