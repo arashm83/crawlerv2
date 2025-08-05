@@ -58,12 +58,16 @@ class DbManager:
         try:
             question = Question(**question_data)
             question.hash = hashlib.sha256(question.question_url.encode()).hexdigest()
+            if question.hash in self.question_hashes:
+                return
             self.session.add(question)
             await self.session.flush()
 
             for a_data in answers_data:
                 answer = Answer(**a_data, question_id=question.id)
                 answer.hash = hashlib.sha256(answer.text.encode()).hexdigest()
+                if answer.hash in self.answer_hashes:
+                    continue
                 self.session.add(answer)
                 self.answer_hashes.add(answer.hash)
 
