@@ -19,8 +19,10 @@ REPEAT = 1
 CONCURRENCY_LIMIT = 3
 
 
-async def process_url(context: BrowserContext, url: str, sem: asyncio.Semaphore, db: DbManager):
+async def process_url(context: BrowserContext, url: str, sem: asyncio.Semaphore):
     async with sem:
+        await init_db()
+        db = DbManager()
         page = await context.new_page()
         try:
             questions = await get_questions(context, url, page)
@@ -45,11 +47,9 @@ async def process_url(context: BrowserContext, url: str, sem: asyncio.Semaphore,
             print(f"An error occurred while processing {url}: {e}")
         finally:
             await page.close()
+            await db.close()
 
 async def main():
-    await init_db()
-    db = DbManager()
-    
     sem = asyncio.Semaphore(3)
 
     async with async_playwright() as p:
@@ -60,11 +60,10 @@ async def main():
 
         for i in range(REPEAT):
 
-            tasks = [process_url(context, url, sem, db) for url in topics_urls]
+            tasks = [process_url(context, url, sem) for url in topics_urls]
             await asyncio.gather(*tasks)
 
         await browser.close()
-        await db.close()
 
 if __name__ == '__main__':
     asyncio.run(main())

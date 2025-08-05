@@ -65,35 +65,15 @@ class DbManager:
                 answer = Answer(**a_data, question_id=question.id)
                 answer.hash = hashlib.sha256(answer.text.encode()).hexdigest()
                 self.session.add(answer)
-
-            await self.session.commit()
-            self.question_hashes.add(question.hash)
-
-        except Exception as e:
-            await self.session.rollback()
-
-            for a_data in answers_data:
-                answer = Answer(**a_data, question_id=question.id)
-                self.session.add(answer)
                 self.answer_hashes.add(answer.hash)
 
             await self.session.commit()
             self.question_hashes.add(question.hash)
 
+
         except Exception as e:
             await self.session.rollback()
-            print(f"❌ Error saving question/answers: {e}")
-
-
-        async def get_questions(self):
-            result = await self.session.execute(select(Question))
-            return result.scalars().all()
-
-    async def get_answers(self, question_id: int):
-        result = await self.session.execute(
-            select(Answer).where(Answer.question_id == question_id)
-        )
-        return result.scalars().all()
+            print(f"Error saving question/answers: {e}")
 
     async def close(self):
         await self.session.close()
