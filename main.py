@@ -23,6 +23,7 @@ async def process_url(context: BrowserContext, url: str, sem: asyncio.Semaphore)
     async with sem:
         await init_db()
         db = DbManager()
+        await db.init_hashes()
         page = await context.new_page()
         try:
             questions = await get_questions(context, url, page)
