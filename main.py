@@ -1,4 +1,3 @@
-from turtle import st
 from playwright.async_api import async_playwright, BrowserContext
 from core import get_answers, get_questions
 from login import log_in, is_logged_in
