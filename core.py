@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from playwright.async_api import  BrowserContext, TimeoutError
+from playwright.async_api import  BrowserContext, TimeoutError, expect
 from login import is_logged_in, log_in
 import asyncio
 import re
@@ -41,7 +41,9 @@ async def get_answers(context: BrowserContext, url: str, page=None):
         except TimeoutError:
             pass
         try:    
-            await page.click('button:has-text("All related")', timeout=7000)
+            button = page.locator("button", has_text=re.compile(r"All related?\s*\(\d+\)"))
+            await button.click()
+            await expect(button).to_have_attribute("aria-expanded", "true")
         except TimeoutError:
             print(f'couldnt click "All related" in url {url}')
             return []
