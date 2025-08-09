@@ -4,6 +4,10 @@ from login import log_in, is_logged_in
 from db_manager import *
 import asyncio
 import hashlib
+import schedule
+from random import randrange
+from time import sleep
+from datetime import datetime
 
 topics_urls = [
     'https://www.quora.com/topic/Deep-Learning/top_questions',
@@ -69,9 +73,25 @@ async def main():
 
         await browser.close()
 
-if __name__ == '__main__':
+def job():    
+    print(f"running at {datetime.now()}")
     asyncio.run(main())
 
-    
+def schedule_time(run_per_day=4, start_hour=9, end_hour=22):
+    schedule.clear("random_runs")
+    random_start_hour = randrange(start_hour, end_hour - 2 * run_per_day)
+    random_hours = [random_start_hour + i for i in range(0, 2*run_per_day, 2)]
+    random_minutes = [randrange(0, 60) for _ in range(run_per_day)]
+    for i in range(run_per_day):
+        run_time = f"{random_hours[i]:02d}:{random_minutes[i]:02d}"
+        print(f"scheduled at {run_time}")
+        schedule.every().day.at(run_time).do(job).tag("random_runs")
+
+if __name__ == '__main__':
+    schedule.every().minute.at(":00").do(schedule_time).tag("schedule_time")
+    schedule_time()
+    while True:
+        schedule.run_pending()
+        sleep(60)
 
     
