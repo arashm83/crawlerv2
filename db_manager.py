@@ -4,6 +4,13 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy  import select
 import hashlib
 
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[logging.StreamHandler()]
+)
 
 Base = declarative_base()
 engine = create_async_engine('sqlite+aiosqlite:///quora.db')
@@ -43,14 +50,14 @@ class DbManager:
             result = await self.session.execute(select(Question.hash))
             self.question_hashes = set([row[0] for row in result.all()])
         except Exception as e:
-            print(f"Error retrieving hashes: {e}")
+            logging.error(f"Error retrieving hashes: {e}")
             self.question_hashes = set()
 
         try:
             result = await self.session.execute(select(Answer.hash))
             self.answer_hashes = set([row[0] for row in result.all()])
         except Exception as e:
-            print(f"Error retrieving hashes: {e}")
+            logging.error(f"Error retrieving hashes: {e}")
             self.answer_hashes = set()
 
     async def add_question_with_answers(self, question_data, answers_data):
@@ -76,7 +83,7 @@ class DbManager:
 
         except Exception as e:
             await self.session.rollback()
-            print(f"Error saving question/answers: {e}")
+            logging.error(f"Error saving question/answers: {e}")
 
     async def close(self):
         await self.session.close()

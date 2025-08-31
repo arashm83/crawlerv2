@@ -8,6 +8,13 @@ import schedule
 from random import randrange
 from time import sleep
 from datetime import datetime
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[logging.StreamHandler()]
+)
 
 topics_urls = [
     'https://www.quora.com/topic/Deep-Learning/top_questions',
@@ -50,9 +57,9 @@ async def process_url(context: BrowserContext, url: str, sem: asyncio.Semaphore)
                     {"text": q_text, "question_url": q_url, "hash": q_hash},
                     answer_data
                 )
-            print(f'done with url: {url}')
+            logging.info(f'done with url: {url}')
         except Exception as e:
-            print(f"An error occurred while processing {url}: {e}")
+            logging.error(f"An error occurred while processing {url}: {e}")
         finally:
             await page.close()
             await db.close()
@@ -74,7 +81,7 @@ async def main():
         await browser.close()
 
 def job():    
-    print(f"running at {datetime.now()}")
+    logging.info(f"running at {datetime.now()}")
     asyncio.run(main())
 
 def schedule_time(run_per_day=4, start_hour=9, end_hour=22):
@@ -84,12 +91,13 @@ def schedule_time(run_per_day=4, start_hour=9, end_hour=22):
     random_minutes = [randrange(0, 60) for _ in range(run_per_day)]
     for i in range(run_per_day):
         run_time = f"{random_hours[i]:02d}:{random_minutes[i]:02d}"
-        print(f"scheduled at {run_time}")
+        logging.info(f"scheduled at {run_time}")
         schedule.every().day.at(run_time).do(job).tag("random_runs")
 
 if __name__ == '__main__':
     schedule.every().minute.at(":00").do(schedule_time).tag("schedule_time")
     schedule_time()
+    job()
     while True:
         schedule.run_pending()
         sleep(60)

@@ -3,7 +3,13 @@ from playwright.async_api import  BrowserContext, TimeoutError, expect
 from login import is_logged_in, log_in
 import asyncio
 import re
+import logging
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[logging.StreamHandler()]
+)
 
 async def get_questions(context: BrowserContext, url: str, page=None):
     if page is None or page.is_closed():
@@ -45,13 +51,13 @@ async def get_answers(context: BrowserContext, url: str, page=None):
             await button.click()
             await expect(button).to_have_attribute("aria-expanded", "true")
         except TimeoutError:
-            print(f'couldnt click "All related" in url {url}')
+            logging.error(f'couldnt click "All related" in url {url}')
             return []
         await asyncio.sleep(0.1)
         try:
             await page.locator("div.q-click-wrapper", has_text=re.compile(r"^Answers?\s*\(\d+\)$")).click()
         except TimeoutError:
-            print(f'couldnt click Answers in url {url}')
+            logging.error(f'couldnt click Answers in url {url}')
             return []
         await asyncio.sleep(2)
 

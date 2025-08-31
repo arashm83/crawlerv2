@@ -1,4 +1,12 @@
 from playwright.async_api import  TimeoutError, BrowserContext
+import logging
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[logging.StreamHandler()]
+)
 
 EMAIL = 'example@gmail.com'
 PASSWORD = 'password'
@@ -17,7 +25,7 @@ async def log_in(context: BrowserContext ,email=EMAIL, password=PASSWORD):
             await context.storage_state(path="state.json")
             return True
     except TimeoutError as e:
-        print(f'log in failed: {e}')
+        logging.error(f'log in failed: {e}')
         return False
     finally:
          await page.close()
